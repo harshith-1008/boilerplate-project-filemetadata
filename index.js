@@ -1,20 +1,45 @@
-var express = require('express');
-var cors = require('cors');
-require('dotenv').config()
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-var app = express();
+const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use('/public', express.static(process.cwd() + '/public'));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
-app.get('/', function (req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+const upload = multer({ dest: "temp/" }); //file temporarily stored in ./temp
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
+app.post("/api/filedetails", upload.single("upfile"), (req, res) => {
+  if (!req.file) {
+    return res.json({ error: "no file found" });
+  }
 
+  const { originalname: name, mimetype: type, size } = req.file;
 
+  res.json({
+    name,
+    type,
+    size,
+  });
 
-const port = process.env.PORT || 3000;
-app.listen(port, function () {
-  console.log('Your app is listening on port ' + port)
+  fs.unlink(req.file.path, (err) => {
+    //logic to delete from temporary storage
+    if (err) {
+      console.error("error deleting:", err);
+    } else {
+      console.log("file deleted successfully");
+    }
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Your app is listening on port ${port}`);
 });
