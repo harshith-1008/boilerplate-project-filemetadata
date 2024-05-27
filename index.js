@@ -25,13 +25,15 @@ app.post("/api/filedetails", upload.single("upfile"), (req, res) => {
     return res.json({ error: "no file found" });
   }
 
-  const { originalname: name, mimetype: type, size } = req.file;
+  const { originalname, mimetype, size } = req.file;
 
-  res.json({
-    name,
-    type,
-    size,
-  });
+  const response = {
+    name: originalname,
+    type: mimetype,
+    size: size,
+  };
+
+  res.json(response);
 
   fs.unlink(req.file.path, (err) => {
     //logic to delete from temporary storage
