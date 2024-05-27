@@ -11,7 +11,10 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-const upload = multer({ dest: "temp/" }); //file temporarily stored in ./temp
+const isServerless = !!process.env.VERCEL;
+const uploadDirectory = isServerless ? "/tmp/" : "temp/";
+
+const upload = multer({ dest: uploadDirectory });
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
